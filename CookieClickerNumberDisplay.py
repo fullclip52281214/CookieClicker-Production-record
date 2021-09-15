@@ -31,7 +31,7 @@ def extract(lt):
 
 
 def KBCheck():
-    for i in range(200):
+    for i in range(20):
         time.sleep(0.05)        
         if(kb.is_pressed("esc")):
             print("ProgramEnd")
@@ -50,11 +50,12 @@ def KBCheck():
 
 def draw(timeline,num):
     plt.plot((timeline),(num))
+    plt.axis([0,int(time.time()-initialTime), 0,float(1.2*max(num))])
     plt.title("amount") # title
     plt.ylabel("cookies") # y label
     plt.xlabel("time") # x label 
     plt.grid(True)
-    plt.yscale("log")
+    #plt.yscale("log")
     plt.savefig("001.png",dpi=230)
     plt.show()
 
@@ -73,7 +74,7 @@ if __name__=="__main__":
         w32.EnumWindows(foo, 0)
         lt = [t for t in titles if t]
         extract(lt)
-        timeline.append(int(time.time())-initialTime)
+        timeline.append(int(time.time()-initialTime))
         num.append(int(currentnum))
         
         
