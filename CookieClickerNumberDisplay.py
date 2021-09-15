@@ -1,7 +1,7 @@
 import win32gui as w32
 import time
 import matplotlib.pyplot as plt
-#%matplotlib inline
+#PLT seems to have to stay in the main thread?
 import threading
 
 
@@ -14,8 +14,8 @@ def waiting():
         print("命令是"+operate)
         time.sleep(1)
 
-t = threading.Thread(target = waiting)
-t.start()
+t2 = threading.Thread(target = waiting)
+t2.start()
 
 
 #視窗擷取程式參考：https://www.itread01.com/article/1426210195.html
@@ -49,7 +49,6 @@ def opCheck():
         time.sleep(0.05)        
         if(operate=="end"):
             print("ProgramEnd")
-            draw(timeline,num)
             isProgramEnd=True
             return 1
         
@@ -64,37 +63,46 @@ def opCheck():
 
 def draw(timeline,num):
     plt.plot((timeline),(num))
-    plt.axis([0,int(time.time()-initialTime), 0,float(1.12*max(num))])
+    plt.axis([0,int(time.time()-initialTime), 0,float(1.1*max(num))])
     plt.title("amount") # title
     plt.ylabel("cookies") # y label
     plt.xlabel("time") # x label 
     plt.grid(True)
     #plt.yscale("log")
-    plt.savefig("001.png",dpi=230)
+    #plt.savefig("001.png",dpi=230)
     plt.show()
+
+
+
+def record():
+    global num,timeline,stopFlag,currentnum,titles
+    while not isProgramEnd:    
+        titles=set()        
+        w32.EnumWindows(foo, 0)
+        lt = [t for t in titles if t]
+        extract(lt)
+        timeline.append(int(time.time()-initialTime))
+        num.append(int(currentnum))
+        #print(currentnum)
+        currentnum=0
+        time.sleep(1)
+
+t3=threading.Thread(target = record)
 
       
         
 if __name__=="__main__":
     
     initialTime=time.time()
-    
+    titles = set()
     timeline=[]
     num=[]
     stopFlag=0
-    
-    while True:    
-        titles = set()
-        w32.EnumWindows(foo, 0)
-        lt = [t for t in titles if t]
-        extract(lt)
-        timeline.append(int(time.time()-initialTime))
-        num.append(int(currentnum))
-
-        currentnum=0
+    t3.start()
         
-        
+    while True :    
         if(opCheck()):
             break
         
-    t.join()  
+    t2.join()  
+    t3.join()

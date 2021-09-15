@@ -1,0 +1,4 @@
+如果CookieClicker根本沒開
+利用SQL儲存資料
+圖表美化
+GUI
