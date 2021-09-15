@@ -1,9 +1,22 @@
 import win32gui as w32
 import time
-import matplotlib
 import matplotlib.pyplot as plt
 #%matplotlib inline
-import keyboard as kb
+import threading
+
+
+operate=""
+isProgramEnd=False
+def waiting():
+    global operate
+    while not isProgramEnd:
+        operate=input("請輸入要執行的指令\n(show/end):")
+        print("命令是"+operate)
+        time.sleep(1)
+
+t = threading.Thread(target = waiting)
+t.start()
+
 
 #視窗擷取程式參考：https://www.itread01.com/article/1426210195.html
 def foo(hwnd,mouse):
@@ -30,19 +43,20 @@ def extract(lt):
                         charToInt(t[c])
 
 
-def KBCheck():
+def opCheck():
+    global operate,isProgramEnd
     for i in range(20):
         time.sleep(0.05)        
-        if(kb.is_pressed("esc")):
+        if(operate=="end"):
             print("ProgramEnd")
             draw(timeline,num)
-            #plt.savefig("END.png")
-
+            isProgramEnd=True
             return 1
-        if(kb.is_pressed("s")):
+        
+        if(operate=="show"):
             draw(timeline,num)
             #plt.savefig(str(time.ctime())+'.png')
-            
+            operate=""
             time.sleep(0.2)   
             return 0
     return 0
@@ -50,7 +64,7 @@ def KBCheck():
 
 def draw(timeline,num):
     plt.plot((timeline),(num))
-    plt.axis([0,int(time.time()-initialTime), 0,float(1.2*max(num))])
+    plt.axis([0,int(time.time()-initialTime), 0,float(1.12*max(num))])
     plt.title("amount") # title
     plt.ylabel("cookies") # y label
     plt.xlabel("time") # x label 
@@ -76,16 +90,11 @@ if __name__=="__main__":
         extract(lt)
         timeline.append(int(time.time()-initialTime))
         num.append(int(currentnum))
-        
-        
-        
 
-        
-        
         currentnum=0
         
         
-        if(KBCheck()):
+        if(opCheck()):
             break
         
-    
+    t.join()  
