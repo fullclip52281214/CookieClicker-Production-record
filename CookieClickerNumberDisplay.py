@@ -20,10 +20,14 @@ def extract(lt):
     lt.sort()
     for t in lt:
         if("块饼干" in t):
-            for c in range(t.find("块饼干")-1):
-                if not t[c] == ',':
-                    #print(t[c])
-                    charToInt(t[c])
+            if("e+" in t):
+                global currentnum
+                currentnum=int(float(t[0:t.find("块饼干")-1]))#科學記號轉INT
+            else:            
+                for c in range(t.find("块饼干")-1):
+                    if not t[c] == ',':
+                        #print(t[c])
+                        charToInt(t[c])
 
 
 def KBCheck():
