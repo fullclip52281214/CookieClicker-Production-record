@@ -1,5 +1,5 @@
-如果CookieClicker根本沒開
+如果CookieClicker根本沒開?
 利用SQL儲存資料
 圖表美化
 GUI
-產速  if(num(t+1)-num(t)!=0)save time and speed，強制用LOG畫圖
+end 之後強制關閉表格
