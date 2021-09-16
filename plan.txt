@@ -2,3 +2,4 @@
 利用SQL儲存資料
 圖表美化
 GUI
+產速  if(num(t+1)-num(t)!=0)save time and speed，強制用LOG畫圖

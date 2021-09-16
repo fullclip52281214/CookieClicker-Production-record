@@ -5,25 +5,28 @@ import matplotlib.pyplot as plt
 import threading
 
 
+print("-----Program Recording-----")   
+
 operate=""
 isProgramEnd=False
 def waiting():
     global operate
     while not isProgramEnd:
-        operate=input("請輸入要執行的指令\n(show/end):")
-        print("命令是"+operate)
+        operate=input("請輸入要執行的指令\n(cookie/speed/end):")
+        print("已接收命令："+operate)
         time.sleep(1)
 
 t2 = threading.Thread(target = waiting)
 t2.start()
 
 
-#視窗擷取程式參考：https://www.itread01.com/article/1426210195.html
+#Window Extractor refer to：https://www.itread01.com/article/1426210195.html
 def foo(hwnd,mouse):
     if w32.IsWindow(hwnd) and w32.IsWindowEnabled(hwnd) and w32.IsWindowVisible(hwnd):
         titles.add(w32.GetWindowText(hwnd))
     
 currentnum=0
+previousnum=0
 def charToInt(c):
     global currentnum
     currentnum=currentnum*10+int(c)
@@ -33,70 +36,110 @@ def extract(lt):
     lt.sort()
     for t in lt:
         if("块饼干" in t):
+            if("飞升" in t):#用法待確認
+                break
             if("e+" in t):
                 global currentnum
-                currentnum=int(float(t[0:t.find("块饼干")-1]))#科學記號轉INT
+                currentnum=int(float(t[0:t.find("块饼干")-1]))
             else:            
                 for c in range(t.find("块饼干")-1):
-                    if not t[c] == ',':
+                    if t[c]=='.':
+                        break
+                    elif not t[c] == ',':
                         #print(t[c])
                         charToInt(t[c])
 
-
+isProgramAlive=False
 def opCheck():
-    global operate,isProgramEnd
-    for i in range(20):
-        time.sleep(0.05)        
-        if(operate=="end"):
-            print("ProgramEnd")
-            isProgramEnd=True
-            return 1
+    global operate,isProgramEnd,isProgramAlive
+    time.sleep(0.2)        
+    if(operate=="end"):
+        print("ProgramEnd")
+        isProgramEnd=True
+        return 1
+    
+    if(operate=="cookie"):
+        cookies.draw()
+        #plt.savefig(str(time.ctime())+'.png')
+        operate=""
+        time.sleep(0.2)  
         
-        if(operate=="show"):
-            draw(timeline,num)
-            #plt.savefig(str(time.ctime())+'.png')
-            operate=""
-            time.sleep(0.2)   
-            return 0
+    elif(operate=="speed"):
+        speed.draw()
+        #plt.savefig(str(time.ctime())+'.png')
+        operate=""
+        time.sleep(0.2)   
+        
+    elif(operate=="alive"):
+        isProgramAlive=not isProgramAlive
+        operate=""
+        
     return 0
 
 
-def draw(timeline,num):
-    plt.plot((timeline),(num))
-    plt.axis([0,int(time.time()-initialTime), 0,float(1.1*max(num))])
-    plt.title("amount") # title
-    plt.ylabel("cookies") # y label
-    plt.xlabel("time") # x label 
-    plt.grid(True)
-    #plt.yscale("log")
-    #plt.savefig("001.png",dpi=230)
-    plt.show()
+
 
 
 
 def record():
-    global num,timeline,stopFlag,currentnum,titles
+    global cookies,speed,stopFlag,currentnum,titles,previousnum
     while not isProgramEnd:    
         titles=set()        
         w32.EnumWindows(foo, 0)
         lt = [t for t in titles if t]
         extract(lt)
-        timeline.append(int(time.time()-initialTime))
-        num.append(int(currentnum))
-        #print(currentnum)
+        cookies.time.append(int(time.time()-initialTime))
+        cookies.num.append(int(currentnum))
+        
+        if(previousnum!=currentnum):
+            speed.time.append(int(time.time()-initialTime))
+            speed.num.append(currentnum-previousnum)
+        
+     
+        if(isProgramAlive):
+            print(currentnum)
+        
+        previousnum=currentnum
         currentnum=0
         time.sleep(1)
 
 t3=threading.Thread(target = record)
 
-      
+
+class data:
+    def __init__(self,time,num):
+        self.time=time
+        self.num=num
         
+    def drawMethod(self,miny,maxy):
+        plt.plot((self.time),(self.num))
+        plt.axis([0,int(time.time()-initialTime), miny,maxy])
+        plt.xlabel("time (sec)") # x label 
+        plt.grid(True)
+        #plt.savefig("001.png",dpi=230)
+        plt.show()
+        
+    def draw(self):
+        if(self==cookies):
+            plt.title("Cookie Clicker's Cookies") # title
+            plt.ylabel("cookies") # y label
+            self.drawMethod(0,float(max(self.num)*1.1))
+        elif(self==speed):
+            plt.yscale("log")
+            plt.title("Cookie Clicker's Production speed(positive only)") # title
+            plt.ylabel("speed (log)") # y label
+            self.drawMethod(1,float(max(self.num)**1.1))
+            
+    
+        
+      
+     
 if __name__=="__main__":
     
     initialTime=time.time()
     titles = set()
-    timeline=[]
-    num=[]
+    cookies=data([],[])
+    speed=data([],[])
     stopFlag=0
     t3.start()
         
