@@ -1,8 +1,6 @@
 import win32gui as w32
 import time
 
-#PLT seems to have to stay in the main thread?
-
 import Globals
 #Globals.initialize()
 
@@ -48,7 +46,6 @@ def extract(lt):
 
 
 def record():
-    #global cookies,speed,currentnum,titles,previousnum
     global currentnum,titles,previousnum
     while not Globals.isProgramEnd:    
         titles=set()        
@@ -58,10 +55,12 @@ def record():
         Globals.cookies.time.append(int(time.time()-Globals.initialTime))
         Globals.cookies.num.append(int(currentnum))
         
-        if(previousnum!=currentnum):
+        if(previousnum!=currentnum and currentnum>previousnum and previousnum!=0):#it's a good idea?
             Globals.speed.time.append(int(time.time()-Globals.initialTime))
-            Globals.speed.num.append(currentnum-previousnum)
-        
+            if(len(Globals.speed.time)>=2):
+                Globals.speed.num.append((currentnum-previousnum)/(Globals.speed.time[-1]-Globals.speed.time[-2]))
+            else:
+                Globals.speed.num.append(1)
      
         if(Globals.isProgramAlive):
             print(currentnum)
